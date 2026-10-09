@@ -64,19 +64,55 @@ function renderVaultGrid(){
   });
 }
 
-/* ---- Modal Password + Keyboard Adaptif ---- */
-let currentVaultId=null, currentInput='';
+/* ---- Modal Password: Step 1 Pilih Tim -> Step 2 Keyboard Jawaban ---- */
+let currentVaultId=null, currentInput='', currentTeamIdx=null;
+
+/* Ikon & warna kartu pemilihan tim — semua karakter Unicode/emoji bawaan
+   sistem (tidak perlu internet/gambar eksternal), aman untuk mode offline. */
+const TEAM_ICONS  = ['🛡️','⚔️','🔥','⚡','🚀','👑','🎯','🐉'];
+const TEAM_COLORS = ['#00f2fe','#ffb703','#ff3b5c','#8b5cf6','#00e676','#ff8c42'];
+
 function openVaultModal(id){
   const v = state.vaults.find(x=>x.id===id);
   if(!v || v.locked) return;
-  currentVaultId=id; currentInput='';
-  document.getElementById('vault-modal-title').textContent = 'VAULT #'+String(v.id).padStart(2,'0')+' - '+v.points+' PTS';
-  const sel = document.getElementById('vault-team-select');
-  sel.innerHTML = state.teams.map((t,i)=>'<option value="'+i+'">'+escapeHtml(t.name)+'</option>').join('');
-  updatePwDisplay();
-  renderKeyboard(v.type);
+  currentVaultId=id; currentInput=''; currentTeamIdx=null;
+
+  const label = 'VAULT #'+String(v.id).padStart(2,'0')+' - '+v.points+' PTS';
+  document.getElementById('vault-modal-title-team').textContent = label;
+  document.getElementById('vault-modal-title').textContent = label;
+
+  const btnWrap = document.getElementById('vault-team-btns');
+  btnWrap.innerHTML = state.teams.map((t,i)=>{
+    const color = TEAM_COLORS[i % TEAM_COLORS.length];
+    const icon = TEAM_ICONS[i % TEAM_ICONS.length];
+    return '<button type="button" class="team-pick-card" style="--tc:'+color+'" onclick="selectVaultTeam('+i+')">'+
+      '<span class="tc-icon">'+icon+'</span>'+
+      '<span class="tc-name">'+escapeHtml(t.name)+'</span>'+
+      '<span class="tc-score">'+t.score+' PTS</span>'+
+    '</button>';
+  }).join('');
+
+  document.getElementById('vault-step-team').style.display='';
+  document.getElementById('vault-step-answer').style.display='none';
   document.getElementById('modal-vault').classList.add('show');
+}
+
+function selectVaultTeam(idx){
+  currentTeamIdx = idx;
+  currentInput='';
+  const team = state.teams[idx];
+  document.getElementById('vault-modal-team-sub').textContent = 'Tim: '+team.name+' — Masukkan kode password rahasia dari lembar soal.';
+  updatePwDisplay();
+  renderKeyboard();
+  document.getElementById('vault-step-team').style.display='none';
+  document.getElementById('vault-step-answer').style.display='';
   setTimeout(()=>document.getElementById('vault-pw-display').focus(),50);
+}
+
+function backToTeamSelect(){
+  currentInput=''; currentTeamIdx=null;
+  document.getElementById('vault-step-answer').style.display='none';
+  document.getElementById('vault-step-team').style.display='';
 }
 function updatePwDisplay(){
   document.getElementById('vault-pw-display').value = currentInput;
@@ -89,31 +125,63 @@ function kbBackspace(){ currentInput = currentInput.slice(0,-1); updatePwDisplay
 function kbClear(){ currentInput=''; updatePwDisplay(); }
 function kbSpace(){ currentInput+=' '; updatePwDisplay(); }
 
-function renderKeyboard(type){
+/* Simbol matematika yang tersedia di semua tipe keyboard */
+const MATH_SYMBOL_ROWS = ['+-×÷=%', '().,√', '²³^π', '<>≠±∞'];
+
+function makeKeyBtn(label, onClick, opts){
+  const b=document.createElement('button');
+  b.type='button';
+  b.textContent=label;
+  if(opts && opts.wide) b.className='wide';
+  if(opts && opts.symbol) b.classList.add('kb-symbol');
+  b.onclick=onClick;
+  return b;
+}
+function addRow(kb, chars, opts){
+  const row=document.createElement('div'); row.className='kb-row'+(opts&&opts.symbol?' kb-row-symbols':'');
+  chars.split('').forEach(ch=>row.appendChild(makeKeyBtn(ch, ()=>kbPress(ch), {symbol:opts&&opts.symbol})));
+  kb.appendChild(row);
+}
+function addMathSymbolRows(kb){
+  MATH_SYMBOL_ROWS.forEach(r=>addRow(kb, r, {symbol:true}));
+}
+
+function toggleSymbolKeyboard(){
+  const wrap = document.getElementById('kb-symbols-wrap');
+  const btn = document.getElementById('kb-expand-btn');
+  const isOpen = wrap.classList.toggle('open');
+  btn.textContent = isOpen ? '🔼 SEMBUNYIKAN SIMBOL & KARAKTER MATIK' : '🔣 SIMBOL & KARAKTER MATIK';
+}
+
+function renderKeyboard(){
+  /* Keyboard standar (QWERTY + angka) untuk semua tipe vault.
+     Simbol/karakter matik (×÷≠π√ dsb) disembunyikan di balik tombol "expand". */
   const kb = document.getElementById('vault-keyboard');
   kb.innerHTML='';
-  if(type==='binary'){
-    const row1 = document.createElement('div'); row1.className='kb-row';
-    ['1','0'].forEach(d=>{ const b=document.createElement('button'); b.type='button'; b.textContent=d; b.onclick=()=>kbPress(d); row1.appendChild(b); });
-    kb.appendChild(row1);
-    const row2 = document.createElement('div'); row2.className='kb-row';
-    const bc=document.createElement('button'); bc.type='button'; bc.textContent='Clear'; bc.onclick=kbClear;
-    const bb=document.createElement('button'); bb.type='button'; bb.textContent='⌫'; bb.onclick=kbBackspace;
-    row2.appendChild(bc); row2.appendChild(bb);
-    kb.appendChild(row2);
-  }else{
-    const rows = ['1234567890','QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
-    rows.forEach(r=>{
-      const row=document.createElement('div'); row.className='kb-row';
-      r.split('').forEach(ch=>{ const b=document.createElement('button'); b.type='button'; b.textContent=ch; b.onclick=()=>kbPress(ch); row.appendChild(b); });
-      kb.appendChild(row);
-    });
-    const lastRow = document.createElement('div'); lastRow.className='kb-row';
-    const bsp=document.createElement('button'); bsp.type='button'; bsp.textContent='SPASI'; bsp.className='wide'; bsp.onclick=kbSpace;
-    const bbk=document.createElement('button'); bbk.type='button'; bbk.textContent='⌫ HAPUS'; bbk.className='wide'; bbk.onclick=kbBackspace;
-    lastRow.appendChild(bsp); lastRow.appendChild(bbk);
-    kb.appendChild(lastRow);
-  }
+
+  const rows = ['1234567890','QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+  rows.forEach(r=>addRow(kb, r));
+
+  const lastRow = document.createElement('div'); lastRow.className='kb-row';
+  lastRow.appendChild(makeKeyBtn('SPASI', kbSpace, {wide:true}));
+  lastRow.appendChild(makeKeyBtn('⌫ HAPUS', kbBackspace, {wide:true}));
+  kb.appendChild(lastRow);
+
+  const expandRow = document.createElement('div'); expandRow.className='kb-row';
+  const expandBtn = makeKeyBtn('🔣 SIMBOL & KARAKTER MATIK', toggleSymbolKeyboard, {wide:true});
+  expandBtn.id='kb-expand-btn';
+  expandBtn.className='kb-expand-toggle';
+  expandRow.appendChild(expandBtn);
+  kb.appendChild(expandRow);
+
+  const symWrap = document.createElement('div');
+  symWrap.className='kb-symbols-wrap';
+  symWrap.id='kb-symbols-wrap';
+  addMathSymbolRows(symWrap);
+  const clearRow = document.createElement('div'); clearRow.className='kb-row';
+  clearRow.appendChild(makeKeyBtn('Clear', kbClear, {wide:true}));
+  symWrap.appendChild(clearRow);
+  kb.appendChild(symWrap);
 }
 
 function normalizeAns(s){ return (s||'').toString().trim().toUpperCase().replace(/\s+/g,' '); }
@@ -121,8 +189,8 @@ function normalizeAns(s){ return (s||'').toString().trim().toUpperCase().replace
 function submitVaultAnswer(){
   const v = state.vaults.find(x=>x.id===currentVaultId);
   if(!v) return;
-  const teamIdx = parseInt(document.getElementById('vault-team-select').value,10);
-  const team = state.teams[teamIdx];
+  if(currentTeamIdx===null){ backToTeamSelect(); return; }
+  const team = state.teams[currentTeamIdx];
   const isCorrect = normalizeAns(currentInput) === normalizeAns(v.answer);
   closeModal('modal-vault');
 

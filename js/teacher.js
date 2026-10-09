@@ -55,7 +55,7 @@ function renderQuestionEditor(){
         '<label style="font-size:10px;color:var(--text-dim);">Tipe Input</label>'+
         '<select onchange="updateInputType('+v.id+',this.value)">'+
           '<option value="text"'+(v.type==='text'?' selected':'')+'>Kata/Kalimat</option>'+
-          '<option value="binary"'+(v.type==='binary'?' selected':'')+'>Biner/Angka</option>'+
+          '<option value="binary"'+(v.type==='binary'?' selected':'')+'>Angka & Simbol Matematika</option>'+
         '</select>'+
       '</div>'+
       '<button type="button" class="icon-btn" title="Hapus" onclick="deleteVault('+v.id+')">🗑️</button>';

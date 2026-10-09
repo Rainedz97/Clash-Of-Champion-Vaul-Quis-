@@ -149,7 +149,30 @@ input,select,textarea{font-family:inherit;}
   border-radius:8px;padding:10px 0;font-size:14px;font-weight:600;}
 .kb button:hover{border-color:var(--cyan);}
 .kb button.wide{grid-column:span 2;}
+.kb-row-symbols{margin:2px 0;}
+.kb button.kb-symbol{background:var(--navy);border-color:var(--cyan);color:var(--cyan);font-size:16px;}
+.kb button.kb-symbol:hover{background:var(--navy3);}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+
+/* ---- Modal Vault: Step 1 Pilih Tim (kartu vertikal berwarna) ---- */
+.vault-team-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:16px 0 4px;}
+.team-pick-card{--tc:#00f2fe;flex:1 1 100px;max-width:150px;min-height:180px;
+  background:linear-gradient(180deg,var(--navy3),var(--navy));border:2px solid var(--tc);
+  border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:16px 6px;color:var(--text);transition:transform .12s ease, box-shadow .12s ease;}
+.team-pick-card:hover{transform:translateY(-4px);box-shadow:0 0 22px var(--tc);}
+.team-pick-card:active{transform:scale(.96);}
+.tc-icon{font-size:38px;filter:drop-shadow(0 0 6px var(--tc));}
+.tc-name{font-size:14px;font-weight:800;text-align:center;color:var(--tc);letter-spacing:.3px;word-break:break-word;}
+.tc-score{font-size:11px;color:var(--text-dim);letter-spacing:.5px;}
+.vault-back-btn{background:none;border:none;color:var(--text-dim);font-size:13px;
+  padding:0 0 8px;cursor:pointer;letter-spacing:.3px;}
+.vault-back-btn:hover{color:var(--cyan);}
+
+/* ---- Keyboard: panel simbol/karakter matik yang bisa expand ---- */
+.kb button.kb-expand-toggle{background:var(--navy);border-color:var(--cyan);color:var(--cyan);}
+.kb-symbols-wrap{display:none;gap:6px;}
+.kb-symbols-wrap.open{display:grid;}
 
 /* ===================== RESULT OVERLAY ===================== */
 .result-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;

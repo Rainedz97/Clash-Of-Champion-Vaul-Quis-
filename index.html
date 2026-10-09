@@ -187,19 +187,30 @@
 <!-- ===================== VAULT PASSWORD MODAL ===================== -->
 <div class="modal-overlay" id="modal-vault">
   <div class="modal-box">
-    <div class="form-row">
-      <label>Pilih Tim yang Sedang Menjawab</label>
-      <select id="vault-team-select"></select>
+
+    <!-- STEP 1: Pilih Tim -->
+    <div id="vault-step-team">
+      <p class="modal-title" id="vault-modal-title-team">VAULT #00 - 000 PTS</p>
+      <p class="modal-sub">Pilih tim yang sedang menjawab vault ini.</p>
+      <div class="vault-team-btns" id="vault-team-btns"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-vault')">BATAL</button>
+      </div>
     </div>
-    <p class="modal-title" id="vault-modal-title">VAULT #00 - 000 PTS</p>
-    <p class="modal-sub">Masukkan kode password rahasia dari lembar soal.</p>
-    <input type="text" class="pw-display" id="vault-pw-display" autocomplete="off" autocapitalize="off"
-      placeholder="Ketik langsung di sini, atau pakai keyboard layar di bawah"
-      oninput="onDirectTypeInput(this.value)">
-    <div class="kb" id="vault-keyboard"></div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" onclick="closeModal('modal-vault')">BATAL</button>
-      <button type="button" class="btn btn-primary" onclick="submitVaultAnswer()">🔓 UNLOCK VAULT</button>
+
+    <!-- STEP 2: Jawab Password -->
+    <div id="vault-step-answer" style="display:none;">
+      <button type="button" class="vault-back-btn" onclick="backToTeamSelect()">⬅ Ganti Tim</button>
+      <p class="modal-title" id="vault-modal-title">VAULT #00 - 000 PTS</p>
+      <p class="modal-sub" id="vault-modal-team-sub">Masukkan kode password rahasia dari lembar soal.</p>
+      <input type="text" class="pw-display" id="vault-pw-display" autocomplete="off" autocapitalize="off"
+        placeholder="Ketik langsung di sini, atau pakai keyboard layar di bawah"
+        oninput="onDirectTypeInput(this.value)">
+      <div class="kb" id="vault-keyboard"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-vault')">BATAL</button>
+        <button type="button" class="btn btn-primary" onclick="submitVaultAnswer()">🔓 UNLOCK VAULT</button>
+      </div>
     </div>
   </div>
 </div>
